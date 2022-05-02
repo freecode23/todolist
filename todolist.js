@@ -79,6 +79,7 @@ toDoDefault.push(task3);
 // 4. Define what happen when there are post or get request to routes
 // - get "/"
 app.get("/", function(reqFromClient, resToClient) {
+    console.log("\n>>>>>>>>>>>>>>>> app.get/");
     // get all the tasks from the database Task
     Task.find({}, function(err, foundItems) {
 
@@ -97,25 +98,25 @@ app.get("/", function(reqFromClient, resToClient) {
 
             // show all of the found on "/" route
             resToClient.render("list", {
-                titleKey: date.getDate(), // from the date module
+                titleKey: "Today", // from the date module
                 toDoKeys: foundItems // toDoKeys will be passed on to list.
             });
 
         }
 
-    })
+    });
 });
 
 // - get dynamic route
 app.get("/:categoryName", function(reqFromClient, resToClient) {
     const categoryName = reqFromClient.params.categoryName;
-    console.log("app.get/" + categoryName);
+    console.log("\n>>>>>>>>>>>>>>>> app.get/" + categoryName);
 
 
-    TaskList.findOne({ name: categoryName }, function(err, foundList) {
+    TaskList.find({ name: categoryName }, function(err, foundLists) {
         // foundList is not an array. its just one document
         if (!err) {
-            if (foundList === null) {
+            if (foundLists.length === 0) {
                 console.log("no found list. lets make default");
 
                 // create and save
@@ -129,16 +130,16 @@ app.get("/:categoryName", function(reqFromClient, resToClient) {
                 resToClient.redirect("/" + categoryName);
 
             } else {
-                console.log("list exists. lets get it");
-
+                console.log("list exists. lets get updated");
+                console.log(foundLists[0]);
                 // show it on ejs
                 resToClient.render("list", {
-                    titleKey: foundList.name,
-                    toDoKeys: foundList.tasks
-                })
+                    titleKey: foundLists[0].name,
+                    toDoKeys: foundLists[0].tasks
+                });
             }
         }
-    })
+    });
 });
 
 // - get to /about
@@ -151,31 +152,34 @@ app.get("/about", function(reqFromClient, resToClient) {
 app.post("/", function(reqFromClient, resToClient) {
     // - grab the info from the form
     const addedItem = reqFromClient.body.inputItem;
-    const titleName = reqFromClient.body.titleName;
+    const titleName = reqFromClient.body.titleName; // will get us titleKey
 
     // create new
     const newTask = new Task({
         name: addedItem
     })
-    newTask.save();
 
+    if (titleName === "Today") { // if its a homepage
+        console.log("\n>>>>>>>>>>>>>> post to /");
+        newTask.save(); // save it to our home task
+        resToClient.redirect("/");
 
-    resToClient.redirect("/");
+    } else { // custom task
+        console.log("\n>>>>>>>>>>>>>> post to /" + titleName);
 
-    // if (titleName.slice(-1) === ",") { // if its a homepage
-    //     resToClient.redirect("/");s
-    // } else { // custom task
-    //     console.log("post custom task");
+        // get that custom list from database using the name
+        TaskList.findOne({ name: titleName }, function(err, foundList) {
 
-    //     // get that custom list from database
-    //     TaskList.findOne({ name: titleName }, function(err, foundLists) {
-    //         // add this newTask to that list
-    //         foundLists.tasks.push(newTask);
-    //         // show this new task
-    //         foundLists.save;
-    //         resToClient.redirect("/" + titleName);
-    //     })
-    // }
+            // add this newTask to that list
+            foundList.tasks.push(newTask);
+            foundList.save();
+            console.log("After postin: our list is updated:")
+            console.log(foundList);
+            console.log("Let's make get request\n")
+                // show this new task
+            resToClient.redirect("/" + titleName);
+        });
+    }
 });
 
 // - post to /delete
