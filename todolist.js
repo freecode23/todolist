@@ -1,0 +1,203 @@
+// @ts-nocheck
+// jshint require es6
+// On terminal:
+// --> 1 npm init
+// --> 2 npm install express
+// --> 3 npm install body-parser
+// --> 4 npm i mongoose
+
+// 1. imports
+// - external
+const express = require("express");
+
+// to have access to the data in the form that was posted to us (we are the server)
+const bodyParser = require("body-parser");
+
+// to use persist database
+const mongoose = require('mongoose');
+
+const _ = require('lodash');
+// - local 
+// to make https get request
+const https = require('https');
+const date = require(__dirname + "/date.js");
+
+// 2. use 
+const app = express();
+app.use(express.static("public")) // tell node where our static files are
+app.use(bodyParser.urlencoded({ extended: true })); // to get access to the body of our form
+
+// to access css and images
+app.set("view engine", "ejs");
+
+const toDoDefault = [];
+
+
+// 3. set up database
+// - specify the port where we can access our mongodb database server
+mongoose.connect('mongodb://localhost:27017/todolistDB');
+
+//- create interface / schema
+const taskSchema = new mongoose.Schema({
+    name: {
+        type: String,
+        required: [true, "cannot add an item without name"],
+    },
+})
+
+// - create item class / model. This is a collection
+const Task = mongoose.model("task", taskSchema);
+
+// - create task object
+const task1 = new Task({
+    name: "my task 1"
+
+})
+
+const task2 = new Task({
+    name: "my task 2"
+})
+
+const task3 = new Task({
+    name: "my task 3"
+})
+
+// - create a schema/interface that has an array of task interface
+const taskListSchema = {
+    name: String,
+    tasks: [taskSchema]
+}
+const TaskList = mongoose.model("TaskList", taskListSchema);
+
+toDoDefault.push(task1);
+toDoDefault.push(task2);
+toDoDefault.push(task3);
+
+// - insert item to our toDoDefault array
+
+
+// 4. Define what happen when there are post or get request to routes
+// - get "/"
+app.get("/", function(reqFromClient, resToClient) {
+    // get all the tasks from the database Task
+    Task.find({}, function(err, foundItems) {
+
+        // if it's 0, insert default
+        if (foundItems.length === 0) {
+            Task.insertMany(toDoDefault, function(err) {
+                if (err) {
+                    console.log("insertMany error" + err);
+                } else {
+                    console.log("Successfuly inserted arrays to tasks collections");
+                }
+            });
+
+            resToClient.redirect("/");
+        } else {
+
+            // show all of the found on "/" route
+            resToClient.render("list", {
+                titleKey: date.getDate(), // from the date module
+                toDoKeys: foundItems // toDoKeys will be passed on to list.
+            });
+
+        }
+
+    })
+});
+
+// - get dynamic route
+app.get("/:categoryName", function(reqFromClient, resToClient) {
+    const categoryName = reqFromClient.params.categoryName;
+    console.log("app.get/" + categoryName);
+
+
+    TaskList.findOne({ name: categoryName }, function(err, foundList) {
+        // foundList is not an array. its just one document
+        if (!err) {
+            if (foundList === null) {
+                console.log("no found list. lets make default");
+
+                // create and save
+                const list = new TaskList({
+                    name: categoryName,
+                    tasks: toDoDefault
+                });
+                list.save();
+
+                // redirect here
+                resToClient.redirect("/" + categoryName);
+
+            } else {
+                console.log("list exists. lets get it");
+
+                // show it on ejs
+                resToClient.render("list", {
+                    titleKey: foundList.name,
+                    toDoKeys: foundList.tasks
+                })
+            }
+        }
+    })
+});
+
+// - get to /about
+app.get("/about", function(reqFromClient, resToClient) {
+    resToClient.render("about");
+});
+
+
+// - post to /
+app.post("/", function(reqFromClient, resToClient) {
+    // - grab the info from the form
+    const addedItem = reqFromClient.body.inputItem;
+    const titleName = reqFromClient.body.titleName;
+
+    // create new
+    const newTask = new Task({
+        name: addedItem
+    })
+    newTask.save();
+
+
+    resToClient.redirect("/");
+
+    // if (titleName.slice(-1) === ",") { // if its a homepage
+    //     resToClient.redirect("/");s
+    // } else { // custom task
+    //     console.log("post custom task");
+
+    //     // get that custom list from database
+    //     TaskList.findOne({ name: titleName }, function(err, foundLists) {
+    //         // add this newTask to that list
+    //         foundLists.tasks.push(newTask);
+    //         // show this new task
+    //         foundLists.save;
+    //         resToClient.redirect("/" + titleName);
+    //     })
+    // }
+});
+
+// - post to /delete
+app.post("/delete", function(reqFromClient, resToClient) {
+    // - grab the info from the form
+    // delete checkbox is the name of the input
+    // we are taking the value of it
+    // if we don't specify the value, it will just say on
+    const deleteItemId = reqFromClient.body.deleteCheckbox;
+    console.log("item to be deleted: " + deleteItemId);
+
+    Task.findByIdAndRemove(deleteItemId, function(err) {
+        if (!err) {
+            console.log("successfuly deleted item");
+            resToClient.redirect("/");
+        }
+    });
+});
+
+
+// 5. listen
+// allow heroku to choose port
+app.listen(process.env.PORT || 3000, function() {
+    console.log("Express server listening on port %d in %s mode", this.address().port, app.settings.env);
+});
