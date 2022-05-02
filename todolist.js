@@ -109,7 +109,8 @@ app.get("/", function(reqFromClient, resToClient) {
 
 // - get dynamic route
 app.get("/:categoryName", function(reqFromClient, resToClient) {
-    const categoryName = reqFromClient.params.categoryName;
+    const categoryName = _.capitalize(reqFromClient.params.categoryName);
+
     console.log("\n>>>>>>>>>>>>>>>> app.get/" + categoryName);
 
 
@@ -160,12 +161,12 @@ app.post("/", function(reqFromClient, resToClient) {
     })
 
     if (titleName === "Today") { // if its a homepage
-        console.log("\n>>>>>>>>>>>>>> post to /");
+        console.log("\n>>>>>>>>>>>>>> app.post/");
         newTask.save(); // save it to our home task
         resToClient.redirect("/");
 
     } else { // custom task
-        console.log("\n>>>>>>>>>>>>>> post to /" + titleName);
+        console.log("\n>>>>>>>>>>>>>> app.post/" + titleName);
 
         // get that custom list from database using the name
         TaskList.findOne({ name: titleName }, function(err, foundList) {
@@ -173,7 +174,7 @@ app.post("/", function(reqFromClient, resToClient) {
             // add this newTask to that list
             foundList.tasks.push(newTask);
             foundList.save();
-            console.log("After postin: our list is updated:")
+            console.log("After posting: our list is updated:")
             console.log(foundList);
             console.log("Let's make get request\n")
                 // show this new task
@@ -189,14 +190,46 @@ app.post("/delete", function(reqFromClient, resToClient) {
     // we are taking the value of it
     // if we don't specify the value, it will just say on
     const deleteItemId = reqFromClient.body.deleteCheckbox;
-    console.log("item to be deleted: " + deleteItemId);
+    const deleteListName = reqFromClient.body.titleName;
 
-    Task.findByIdAndRemove(deleteItemId, function(err) {
-        if (!err) {
-            console.log("successfuly deleted item");
-            resToClient.redirect("/");
-        }
-    });
+
+    if (deleteListName == "Today") {
+        console.log("\n>>>>>>>>>>>>>> app.post/ delete");
+        console.log("item id to be deleted: " + deleteItemId);
+
+        Task.findByIdAndRemove(deleteItemId, function(err) {
+            if (!err) {
+                console.log("successfuly deleted item");
+                resToClient.redirect("/");
+            }
+        });
+    } else {
+        console.log("\n>>>>>>>>>>>>>> app.post/ delete" + deleteListName);
+        console.log("item id to be deleted: " + deleteItemId);
+
+        // remove the item from an array
+        TaskList.findOneAndUpdate(
+            // - conditions
+            { name: deleteListName },
+
+            // - updates
+
+            {
+                $pull: { // pull from the tasks array, this item with the id
+                    tasks: { _id: deleteItemId }
+                }
+            },
+
+            // - callback
+            // if it's a post just redirect
+            function(err, foundList) {
+                if (!err) {
+
+                    resToClient.redirect("/" + deleteListName);
+                }
+            });
+    }
+
 });
 
 
