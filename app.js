@@ -17,10 +17,6 @@ const bodyParser = require("body-parser");
 // to use persist database
 const mongoose = require('mongoose');
 
-var favicon = require('serve-favicon');
-var path = require('path');
-
-
 
 const _ = require('lodash');
 // - local 
@@ -30,7 +26,6 @@ const date = require(__dirname + "/date.js");
 
 // 2. use 
 const app = express();
-app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
 app.use(express.static("public")) // tell node where our static files are
 app.use(bodyParser.urlencoded({ extended: true })); // to get access to the body of our form
 
