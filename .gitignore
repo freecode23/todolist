@@ -3,8 +3,15 @@
 .AppleDouble
 .LSOverride
 
+<<<<<<< HEAD
 /node_modules
 npm-debug.log
+=======
+
+#heroku
+npm-debug.log
+/*.env
+>>>>>>> 221fc1209145fa944a320d5720fb16a677680d3f
 
 # Icon must end with two \r
 Icon

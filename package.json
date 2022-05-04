@@ -12,6 +12,7 @@
     "author": "",
     "license": "ISC",
     "engines": {
+<<<<<<< HEAD
         "node": "18.0.0"
     },
 
@@ -19,12 +20,25 @@
         "url": "https://github.com/freecode23/todolist/issues"
     },
     "homepage": "https://github.com/freecode23/todolist#readme",
+=======
+        "node": "v18.0.0"
+    },
+
+    "description": "",
+>>>>>>> 221fc1209145fa944a320d5720fb16a677680d3f
     "dependencies": {
         "body-parser": "^1.20.0",
         "ejs": "^3.1.7",
         "express": "^4.18.1",
         "lodash": "^4.17.21",
+<<<<<<< HEAD
         "mongoose": "^6.3.2"
     },
     "description": ""
+=======
+        "mongoose": "^6.3.1"
+    }
+
+
+>>>>>>> 221fc1209145fa944a320d5720fb16a677680d3f
 }
