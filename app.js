@@ -27,6 +27,7 @@ const date = require(__dirname + "/date.js");
 // 2. use 
 const app = express();
 app.use(express.static("public")) // tell node where our static files are
+app.use('/favicon.ico', express.static('images/favicon.ico'));
 app.use(bodyParser.urlencoded({ extended: true })); // to get access to the body of our form
 
 // to access css and images
@@ -236,14 +237,8 @@ app.post("/delete", function(reqFromClient, resToClient) {
 
 
 // 5. listen
-// allow heroku to choose port
-// app.listen(process.env.PORT || 3000, function() {
-//     console.log("Express server listening on port %d in %s mode", this.address().port, app.settings.env);
-// });
-
-
-
 let port = process.env.PORT;
+// let port = null;
 if (port == null || port == "") {
     port = 3000;
 }
