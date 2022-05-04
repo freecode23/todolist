@@ -35,7 +35,8 @@ const toDoDefault = [];
 
 // 3. set up database
 // - specify the port where we can access our mongodb database server
-mongoose.connect('mongodb://localhost:27017/todolistDB');
+const mongourl = "mongodb+srv://admin-sherly:test123@cluster0.sfxwq.mongodb.net/myFirstDatabase?retryWrites=true&w=majority/todolistDB"
+mongoose.connect(mongourl);
 
 //- create interface / schema
 const taskSchema = new mongoose.Schema({
