@@ -3,6 +3,9 @@
 .AppleDouble
 .LSOverride
 
+/node_modules
+npm-debug.log
+
 # Icon must end with two \r
 Icon
 
