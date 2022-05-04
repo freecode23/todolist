@@ -17,6 +17,12 @@ const bodyParser = require("body-parser");
 // to use persist database
 const mongoose = require('mongoose');
 
+var favicon = require('serve-favicon')
+var path = require('path')
+
+app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')))
+
+
 const _ = require('lodash');
 // - local 
 // to make https get request
