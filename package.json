@@ -14,7 +14,6 @@
     "engines": {
         "node": "18.0.0"
     },
-
     "bugs": {
         "url": "https://github.com/freecode23/todolist/issues"
     },
@@ -24,7 +23,8 @@
         "ejs": "^3.1.7",
         "express": "^4.18.1",
         "lodash": "^4.17.21",
-        "mongoose": "^6.3.2"
+        "mongoose": "^6.3.2",
+        "serve-favicon": "^2.5.0"
     },
     "description": ""
 }
