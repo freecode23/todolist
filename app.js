@@ -5,6 +5,7 @@
 // --> 2 npm install express
 // --> 3 npm install body-parser
 // --> 4 npm i mongoose
+// --> 5
 
 // 1. imports
 // - external
@@ -35,7 +36,7 @@ const toDoDefault = [];
 
 // 3. set up database
 // - specify the port where we can access our mongodb database server
-mongoose.connect('mongodb://localhost:27017/todolistDB');
+mongoose.connect('mongodb+srv://admin-sherly:test123@cluster0.sfxwq.mongodb.net/todolistDB');
 
 //- create interface / schema
 const taskSchema = new mongoose.Schema({
