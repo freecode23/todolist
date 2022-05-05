@@ -5,7 +5,6 @@
 // --> 2 npm install express
 // --> 3 npm install body-parser
 // --> 4 npm i mongoose
-// --> 5
 
 // 1. imports
 // - external
@@ -16,11 +15,9 @@ const bodyParser = require("body-parser");
 
 // to use persist database
 const mongoose = require('mongoose');
-
-
 const _ = require('lodash');
-// - local 
-// to make https get request
+
+// - local to make https get request
 const https = require('https');
 const date = require(__dirname + "/date.js");
 
@@ -54,7 +51,6 @@ const Task = mongoose.model("task", taskSchema);
 // - create task object
 const task1 = new Task({
     name: "my task 1"
-
 })
 
 const task2 = new Task({
@@ -83,6 +79,7 @@ toDoDefault.push(task3);
 // - get "/"
 app.get("/", function(reqFromClient, resToClient) {
     console.log("\n>>>>>>>>>>>>>>>> app.get/");
+
     // get all the tasks from the database Task
     Task.find({}, function(err, foundItems) {
 
